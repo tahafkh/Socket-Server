@@ -14,6 +14,8 @@ public:
 
     void set_session_id(std::string session_id);
 
+    void set_code(int _code);
+
     static Response *redirect(std::string url);
 
     std::string show(int &);

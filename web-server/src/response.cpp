@@ -10,20 +10,25 @@ map<int, string> get_http_phrases() {
   http_phrases[200] = "OK";
   http_phrases[303] = "See Other";
   http_phrases[404] = "Not Found";
+  http_phrases[500] = "Internal Server Error";
   return http_phrases;
 }
 
 map<int, string> http_phrases = get_http_phrases();
 
 Response::Response(int code) {
-  this->code = code;
-  this->phrase = http_phrases[code];
+  this->set_code(code);
   this->headers["Content-Type"] = "text/plain";
 }
 
 void Response::set_header(string name, string value) { headers[name] = value; }
 
 void Response::set_body(string _body) { body = _body; }
+
+void Response::set_code(int _code) {
+  code = _code;
+  phrase = http_phrases[code];
+}
 
 void Response::set_session_id(string session_id) {
   set_header("set-cookie", "sessionId=" + session_id + ";");
