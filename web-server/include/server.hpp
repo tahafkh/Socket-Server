@@ -52,8 +52,9 @@ public:
 
 class Server {
 public:
-  Server(int port=5000);
-  ~Server();
+  Server(Server &) = delete;
+  void operator=(const Server &) = delete;
+  static Server *get_instance(int _port, std::string _address);
 
   void set_notfound(std::string);
 
@@ -74,7 +75,12 @@ public:
   };
 
 private:
+  Server(int _port, std::string _address);
+  ~Server(); 
+  static Server *instance;
+
   SOCKET sc;
+  std::string address;
   int port;
   std::vector<Route *> routes;
   RequestHandler *notfound_handler;
