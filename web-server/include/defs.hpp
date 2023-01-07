@@ -18,11 +18,11 @@ enum State
         BODY_BODY
     };
 
-const string NC = "\033[0;39m";
-const string K = "\033[1m";
-const string H = "\033[33;1m";
-const string G = "\033[32m";
-const string R = "\033[31m";
+const std::string NC = "\033[0;39m";
+const std::string K = "\033[1m";
+const std::string H = "\033[33;1m";
+const std::string G = "\033[32m";
+const std::string R = "\033[31m";
 
 const std::string SERVER_NAME = "My Web Server";
 
