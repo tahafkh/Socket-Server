@@ -3,12 +3,11 @@
 
 using namespace std;
 
-Route::Route(Method _method, string _path) {
+Route::Route(Method _method, string _path, RequestHandler *_handler) {
   method = _method;
   path = _path;
+  handler = _handler;
 }
-
-void Route::set_handler(RequestHandler *_handler) { handler = _handler; }
 
 bool Route::match(Method _method, string url) {
   return (url == path) && (_method == method);

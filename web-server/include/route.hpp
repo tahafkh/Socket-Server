@@ -9,10 +9,8 @@ class RequestHandler;
 
 class Route {
 public:
-    Route(Method _method, std::string _path);
+    Route(Method _method, std::string _path, RequestHandler *_handler);
     ~Route();
-
-    void set_handler(RequestHandler *_handler);
 
     bool match(Method, std::string url);
 

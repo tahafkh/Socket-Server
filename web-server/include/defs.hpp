@@ -3,7 +3,20 @@
 #include <string>
 
 #define BUFFER_SIZE 4145152
-enum Method { GET, POST };
+enum Method
+    { 
+        GET,
+        POST
+    };
+
+enum State
+    {
+        REQ,
+        HEADER,
+        BODY,
+        BODY_HEADER,
+        BODY_BODY
+    };
 
 const string NC = "\033[0;39m";
 const string K = "\033[1m";
