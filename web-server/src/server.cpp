@@ -472,4 +472,8 @@ ShowPage::ShowPage(string _path)
 ShowImage::ShowImage(string _path)
     : ShowFile(_path, "image/" + get_extension(_path)) {}
 
+ShowDocument::ShowDocument(string _path)
+    : ShowFile(_path, "application/" + get_extension(_path)) {}
 
+ShowAudio::ShowAudio(string _path)
+    : ShowFile(_path, "audio/" + get_extension(_path)) {}
