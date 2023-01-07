@@ -1,5 +1,4 @@
 #include "../include/handlers.hpp"
-#include "../include/server.hpp"
 #include <iostream>
 #include <string>
 #include <sstream>

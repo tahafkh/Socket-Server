@@ -1,4 +1,5 @@
 #include "../include/response.hpp"
+#include "../include/defs.hpp"
 #include <cstring>
 #include <iostream>
 #include <map>
@@ -52,7 +53,7 @@ string Response::show(int &size) {
   return header + body;
 }
 
-void Response::log(bool show_body=false) {
+void Response::log(bool show_body) {
   string log = "";
   log += H + string("------- Response -------") + NC + string("\n");
   log += K + string("Status:\t") + NC + (code == 200 ? G : R) + to_string(code) + " " + phrase + NC + string("\n");

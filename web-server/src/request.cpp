@@ -1,5 +1,4 @@
 #include "../include/request.hpp"
-#include "../include/utilities.hpp"
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -7,7 +6,7 @@
 
 using namespace std;
 
-Request::Request(string _method="GET") {
+Request::Request(string _method) {
   if (_method == "GET")
     method = GET;
   if (_method == "POST")
@@ -22,19 +21,19 @@ Method Request::get_method() { return method; }
 
 string Request::get_query_param(string key) { return decode_url(query[key]); }
 
-void Request::set_query_param(string key, string value, bool encode=true) {
+void Request::set_query_param(string key, string value, bool encode) {
   query[key] = encode ? encode_url(value) : value;
 }
 
 string Request::get_body_param(string key) { return decode_url(body[key]); }
 
-void Request::set_body_param(string key, string value, bool encode=true) {
+void Request::set_body_param(string key, string value, bool encode) {
   body[key] = encode ? encode_url(value) : value;
 }
 
 string Request::get_header(string key) { return decode_url(headers[key]); }
 
-void Request::set_header(string key, string value, bool encode=true) {
+void Request::set_header(string key, string value, bool encode) {
   headers[key] = encode ? encode_url(value) : value;
 }
 

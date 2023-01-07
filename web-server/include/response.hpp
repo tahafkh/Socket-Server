@@ -1,7 +1,6 @@
 #ifndef __RESPONSE_HPP__
 #define __RESPONSE_HPP__
-#include "../include/defs.hpp"
-#include "../include/utilities.hpp"
+#include "utilities.hpp"
 #include <string>
 
 class Response{

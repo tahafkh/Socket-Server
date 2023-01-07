@@ -323,7 +323,7 @@ Request *parse_raw_request(char *raw_headers, size_t length)
     return req;
 }
 
-Server::Server(int _port, string _address) : port(_port), address(_address) {
+Server::Server(int _port, string _address) {
 #ifdef _WIN32
   WSADATA wsa_data;
   int initializeResult = WSAStartup(MAKEWORD(2, 2), &wsa_data);
@@ -331,7 +331,8 @@ Server::Server(int _port, string _address) : port(_port), address(_address) {
     throw Exception("Error: WinSock WSAStartup failed: " + string(getSocketError()));
   }
 #endif
-
+  port = _port;
+  address = _address;
   notfound_handler = nullptr;
 
   sc = socket(AF_INET, SOCK_STREAM, 0);
@@ -477,3 +478,5 @@ ShowDocument::ShowDocument(string _path)
 
 ShowAudio::ShowAudio(string _path)
     : ShowFile(_path, "audio/" + get_extension(_path)) {}
+
+RequestHandler::~RequestHandler() {}

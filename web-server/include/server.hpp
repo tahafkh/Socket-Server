@@ -1,9 +1,6 @@
 #ifndef __SERVER_HPP__
 #define __SERVER_HPP__
-#include "../include/defs.hpp"
-#include "../include/request.hpp"
-#include "../include/response.hpp"
-#include "../include/route.hpp"
+#include "route.hpp"
 #include <exception>
 #include <string>
 #include <vector>
@@ -16,7 +13,7 @@ typedef int SOCKET;
 
 class RequestHandler {
 public:
-  virtual ~RequestHandler();
+  virtual ~RequestHandler() ;
   virtual Response *callback(Request *req) = 0;
 };
 
