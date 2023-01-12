@@ -12,8 +12,10 @@ int Server::setup_server(int port)
     int server_fd;
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
 
-    if (server_fd < 0)
+    if (server_fd < 0){
         printf("error in server socket");
+        return -1;
+    }
 
     int opt = 1;
     setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
@@ -22,8 +24,10 @@ int Server::setup_server(int port)
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(port);
 
-    if(bind(server_fd, (struct sockaddr *)&address, sizeof(address)))
+    if(bind(server_fd, (struct sockaddr *)&address, sizeof(address))){
         printf("binding error \n");
+        return -1;
+    }
 
     listen(server_fd, 4);
 
@@ -75,6 +79,9 @@ void Server::run()
     int command_server_fd = setup_server(command_channel_port);
     int data_server_fd = setup_server(data_channel_port);
 
+    if (command_server_fd == -1 || data_server_fd == -1)
+        return;
+        
     int max_fd = command_server_fd;
     //char buffer[128] = {0};
   
