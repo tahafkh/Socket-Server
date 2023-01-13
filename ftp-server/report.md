@@ -608,40 +608,53 @@ check username
 <Image title='username' alt="Alt text" src="./pics/username.png">
 
 check password and login
-<Image title='login' alt="Alt text" src="/pics/login.png">
+
+<Image title='login' alt="Alt text" src="./pics/login.png">
 
 invalid password
-<Image title='pass' alt="Alt text" src="/pics/invalidPass.png">
+
+<Image title='pass' alt="Alt text" src="./pics/invalidPass.png">
 
 bad Sequence for command
-<Image title='badSeq' alt="Alt text" src="/pics/badSequence.png">
+
+<Image title='badSeq' alt="Alt text" src="./pics/badSequence.png">
 
 invalid username pass
-<Image title='invalid' alt="Alt text" src="/pics/invalidUsernamePass.png">
+
+<Image title='invalid' alt="Alt text" src="./pics/invalidUsernamePass.png">
 
 need account
-<Image title='needAccount' alt="Alt text" src="/pics/needAccount.png">
+
+<Image title='needAccount' alt="Alt text" src="./pics/needAccount.png">
 
 retr
-<Image title='retr' alt="Alt text" src="/pics/retr.png">
+
+<Image title='retr' alt="Alt text" src="./pics/retr.png">
 
 upload
-<Image title='upload' alt="Alt text" src="/pics/upload.png">
+
+<Image title='upload' alt="Alt text" src="./pics/upload.png">
 
 upload file
-<Image title='uploadFile' alt="Alt text" src="/pics/uploadFile.png">
+
+<Image title='uploadFile' alt="Alt text" src="./pics/uploadFile.png">
 
 help
-<Image title='help' alt="Alt text" src="/pics/help.png">
+
+<Image title='help' alt="Alt text" src="./pics/help.png">
 
 syntax error
+
 <Image title='syntaxError' alt="Alt text" src="./pics/syntaxError.png">
 
 quit
+
 <Image title='quit' alt="Alt text" src="./pics/quit.png">
 
 retr for normal user
+
 <Image title='retrNotAdmin' alt="Alt text" src="./pics/retrNotAdmin.png">
 
 file unavailable for not accessing
+
 <Image title='fileUnavailable' alt="Alt text" src="./pics/fileUnavailable.png">
