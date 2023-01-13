@@ -105,7 +105,7 @@ bool CommandHandler::check_file_name(string file_name)
 
 bool CommandHandler::user_has_access_to_file(string file_name, Connect* client) 
 {
-    if (!user_handler->admin_files(file_name))
+    if (user_handler->admin_files(file_name))
         return true;
     else if (client->check_admin())
         return true;
@@ -160,9 +160,6 @@ std::vector<std::string> CommandHandler::handle_retr(int size, string file_name,
         
     if (!check_file_name(file_name))
         return {SYNTAX_ERROR, SPACE};
-        
-    if (!user_has_access_to_file(file_name, client))
-        return {FILE_UNAVAILABLE, SPACE};
 
     string file_path = client->get_directory() + file_name;
     string size_command = "stat -c%s " + file_path + " > " + "size.txt";
