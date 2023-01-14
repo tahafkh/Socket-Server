@@ -36,8 +36,7 @@ int MessageHandler::set_message_headers(char* buffer, MESSGAE_TYPE_TYPE type, ME
 
 const char* MessageHandler::prepare_connack_message()
 {
-    char* reply = new char[BUFFER_SIZE];
-    bzero(reply, BUFFER_SIZE);
+    char* reply = prepare_buffer(BUFFER_SIZE);
     int reply_offset = 0;
     reply_offset += set_message_headers(reply, Message::Type::CONNACK, Message::get_next_id());
     MESSAGE_LENGTH_TYPE reply_length = sizeof(MESSAGE_ID_TYPE) + sizeof(MESSGAE_TYPE_TYPE);
@@ -46,7 +45,7 @@ const char* MessageHandler::prepare_connack_message()
     return reply;    
 }
 
-const char* MessageHandler::prepare_listreply_message(const vector<USER_ID_TYPE>& user_list)
+const char* MessageHandler::prepare_listreply_message(vector<USER_ID_TYPE> user_list)
 {
     char* reply = prepare_buffer(BUFFER_SIZE);
     int reply_offset = 0;
@@ -63,7 +62,7 @@ const char* MessageHandler::prepare_listreply_message(const vector<USER_ID_TYPE>
     return reply;
 }
 
-const char* MessageHandler::prepare_inforeply_message(const string& user_name)
+const char* MessageHandler::prepare_inforeply_message(string user_name)
 {
     char* reply = prepare_buffer(BUFFER_SIZE);
     int reply_offset = 0;
@@ -106,7 +105,7 @@ const char* MessageHandler::prepare_recievereply_message(Message* message)
     return reply;
 }
 
-const char* MessageHandler::prepare_connect_message(const std::string& user_name)
+const char* MessageHandler::prepare_connect_message(string user_name)
 {
     char* reply = prepare_buffer(BUFFER_SIZE);
     int reply_offset = 0;
@@ -140,7 +139,7 @@ const char* MessageHandler::prepare_info_message(USER_ID_TYPE user_id)
     return reply;
 }
 
-const char* MessageHandler::prepare_send_message(USER_ID_TYPE user_id, const std::string& content)
+const char* MessageHandler::prepare_send_message(USER_ID_TYPE user_id, string content)
 {
     char* reply = prepare_buffer(BUFFER_SIZE);
     int reply_offset = 0;

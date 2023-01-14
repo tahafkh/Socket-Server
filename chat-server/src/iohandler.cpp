@@ -41,7 +41,7 @@ void IOHandler::handle_list_command()
     vector<string> user_list = client->perform_list();
     for (string user : user_list)
     {
-        show("\t -" + user);
+        show(" -" + user);
     }
 }
 

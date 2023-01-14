@@ -30,18 +30,21 @@ static const char *get_socket_error()
 using namespace std;
 
 void Client::connect_to_server()
-{
+{;
     struct sockaddr_in serv_addr;
+
+    fd = socket(AF_INET, SOCK_STREAM, 0);
+
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = inet_addr(address.c_str());
     serv_addr.sin_port = htons(port);
+    serv_addr.sin_addr.s_addr = inet_addr(address.c_str());
 
     if (::connect(fd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
         throw Exception("Error on connecting: " + string(get_socket_error()));
     }
 
     const char* request = message_handler->prepare_connect_message(username);
-    if (write(this->fd, request, strlen(request)) < 0) {
+    if (write(fd, request, sizeof(request)) < 0) {
         throw Exception("Error on writing: " + string(get_socket_error()));
     }
     delete[] request;
@@ -62,11 +65,11 @@ Client::Client(int _port, string _address, string _username)
     this->io_handler = new IOHandler(this);
     this->message_handler = new MessageHandler();
 
-    this->fd = socket(AF_INET, SOCK_STREAM, 0);
     try{
         connect_to_server();
     } catch (Exception &e) {
-        cout << e.get_message() << endl;
+        io_handler->show(e.get_message());
+        exit(0);
     }
 }
 
@@ -102,7 +105,7 @@ void Client::get_username(USER_ID_TYPE user_id)
 {
     this->pending_user_id = user_id;
     const char* request = message_handler->prepare_info_message(user_id);
-    if (write(this->fd, request, strlen(request)) < 0) {
+    if (write(this->fd, request, sizeof(request)) < 0) {
         throw Exception("Error on writing: " + string(get_socket_error()));
     }
     delete[] request;
@@ -129,7 +132,7 @@ vector<string> Client::perform_list()
     user_id_list.clear();
 
     const char* request = message_handler->prepare_list_message();
-    if (write(this->fd, request, strlen(request)) < 0) {
+    if (write(this->fd, request, sizeof(request)) < 0) {
         throw Exception("Error on writing: " + string(get_socket_error()));
     }
     delete[] request;
@@ -154,7 +157,9 @@ void Client::perform_send(string user_name, string message)
     }
     USER_ID_TYPE user_id = name_to_id[user_name];
     const char* request = message_handler->prepare_send_message(user_id, message);
-    if (write(this->fd, request, strlen(request)) < 0) {
+    int kir = write(this->fd, request, sizeof(request));
+    cout << kir << endl;
+    if (kir < 0) {
         throw Exception("Error on writing: " + string(get_socket_error()));
     }
     delete[] request;
@@ -193,12 +198,13 @@ void Client::run()
                 delete[] response;
             }
             if (FD_ISSET(STDIN_FILENO, &master_set)) {
-                char* request = prepare_buffer(BUFFER_SIZE);
-                if (read(STDIN_FILENO, request, BUFFER_SIZE) < 0) {
+                char* buffer = prepare_buffer(BUFFER_SIZE);
+                if (read(STDIN_FILENO, buffer, BUFFER_SIZE) < 0) {
                     throw Exception("Error on reading: " + string(get_socket_error()));
                 }
-                io_handler->handle_command(string(request));
-                delete[] request;
+                string command = string(buffer);
+                delete[] buffer;
+                io_handler->handle_command(command.erase(command.length() - 1));
             }
         } catch (const Exception& e) {
             IOHandler::show(e.get_message());

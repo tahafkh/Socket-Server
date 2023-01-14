@@ -3,7 +3,7 @@
 #include <string>
 #include <stdint.h>
 
-#define BUFFER_SIZE 4145152
+#define BUFFER_SIZE 1024
 
 #define MESSGAE_TYPE_TYPE uint8_t
 #define MESSAGE_ID_TYPE uint8_t
@@ -11,6 +11,8 @@
 
 #define USER_ID_TYPE uint16_t
 #define USER_STATUS_TYPE uint8_t
+
+#define NUMBER_OF_CONNECTIONS 10
 
 #define DELAY 5
 
