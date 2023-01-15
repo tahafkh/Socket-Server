@@ -296,7 +296,6 @@ void Client::handle_recievereply_message(char* buffer, int offset, MESSAGE_LENGT
     USER_ID_TYPE sender_id;
     memcpy(&sender_id, buffer+offset, sizeof(sender_id));
     offset += (int)sizeof(sender_id);
-    cout << (unsigned)sender_id << endl;
     if (sender_id != NO_SENDER_ID)
     {
         int num = ((int)length - (int)sizeof(MESSAGE_ID_TYPE) - (int)sizeof(MESSGAE_TYPE_TYPE) - (int)sizeof(USER_ID_TYPE));
