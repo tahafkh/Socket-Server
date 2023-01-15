@@ -56,4 +56,4 @@ $(BUILD_DIR)/client.o: $(CLIENT_DIR)/client.hpp $(CLIENT_DIR)/client.cpp
 
 .PHONY: clean
 clean:
-	rm -rf $(BUILD_DIR) *.o *.out
+	rm -rf $(BUILD_DIR) *.o *.out log.txt
