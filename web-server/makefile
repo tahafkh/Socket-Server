@@ -8,7 +8,7 @@ ifeq ($(OS),Windows_NT)
 	LDLIBS += -l Ws2_32
 endif
 
-WEB_SERVER_EXECUTABLE_FILE = webserver.out
+WEB_SERVER_EXECUTABLE_FILE = server.out
 
 UtilitiesSensitivityList = \
 	$(SRC_DIR)/utilities.cpp \
