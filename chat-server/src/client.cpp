@@ -42,9 +42,9 @@ void Client::connect_to_server()
     if (::connect(fd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
         throw Exception("Error on connecting: " + string(get_socket_error()));
     }
-
-    const char* request = message_handler->prepare_connect_message(username);
-    if (write(fd, request, sizeof(request)) < 0) {
+    int reply_offset = 0;
+    const char* request = message_handler->prepare_connect_message(username, reply_offset);
+    if (write(fd, request, reply_offset) < 0) {
         throw Exception("Error on writing: " + string(get_socket_error()));
     }
     delete[] request;
@@ -56,6 +56,15 @@ void Client::connect_to_server()
     delete[] response;
 }
 
+void Client::recieve_pending_messages()
+{
+    int reply_offset = 0;
+    const char* request = message_handler->prepare_recieve_message(reply_offset);
+    if (write(fd, request, reply_offset) < 0) {
+        throw Exception("Error on writing: " + string(get_socket_error()));
+    }
+    delete[] request;
+}
 
 Client::Client(int _port, string _address, string _username)
 {
@@ -71,6 +80,7 @@ Client::Client(int _port, string _address, string _username)
         io_handler->show(e.get_message());
         exit(0);
     }
+    recieve_pending_messages();
 }
 
 Client::~Client()
@@ -104,8 +114,9 @@ void Client::update_user_map(const string &user_name)
 void Client::get_username(USER_ID_TYPE user_id)
 {
     this->pending_user_id = user_id;
-    const char* request = message_handler->prepare_info_message(user_id);
-    if (write(this->fd, request, sizeof(request)) < 0) {
+    int reply_offset = 0;
+    const char* request = message_handler->prepare_info_message(user_id, reply_offset);
+    if (write(this->fd, request, reply_offset) < 0) {
         throw Exception("Error on writing: " + string(get_socket_error()));
     }
     delete[] request;
@@ -131,8 +142,9 @@ vector<string> Client::perform_list()
     user_name_list.clear();
     user_id_list.clear();
 
-    const char* request = message_handler->prepare_list_message();
-    if (write(this->fd, request, sizeof(request)) < 0) {
+    int reply_offset = 0;
+    const char* request = message_handler->prepare_list_message(reply_offset);
+    if (write(this->fd, request, reply_offset) < 0) {
         throw Exception("Error on writing: " + string(get_socket_error()));
     }
     delete[] request;
@@ -156,10 +168,9 @@ void Client::perform_send(string user_name, string message)
         throw Exception("User not found");
     }
     USER_ID_TYPE user_id = name_to_id[user_name];
-    const char* request = message_handler->prepare_send_message(user_id, message);
-    int kir = write(this->fd, request, sizeof(request));
-    cout << kir << endl;
-    if (kir < 0) {
+    int reply_offset = 0;
+    const char* request = message_handler->prepare_send_message(user_id, message, reply_offset);
+    if (write(this->fd, request, reply_offset) < 0) {
         throw Exception("Error on writing: " + string(get_socket_error()));
     }
     delete[] request;
@@ -179,32 +190,37 @@ void Client::perform_exit()
 void Client::run()
 {
     int max_fd = fd;
-    fd_set master_set;
+    fd_set master_set, working_set;
     FD_ZERO(&master_set);
     FD_SET(fd, &master_set);
     FD_SET(STDIN_FILENO, &master_set);
 
     while (true) {
         try{
-            if (select(max_fd + 1, &master_set, NULL, NULL, NULL) < 0) {
+            working_set = master_set;
+            if (select(max_fd + 1, &working_set, NULL, NULL, NULL) < 0) {
                 throw Exception("Error on select: " + string(get_socket_error()));
             }
-            if (FD_ISSET(fd, &master_set)) {
-                char* response = prepare_buffer(BUFFER_SIZE);
-                if (read(fd, response, BUFFER_SIZE) < 0) {
-                    throw Exception("Error on reading: " + string(get_socket_error()));
+            for(int fd_ = 0; fd_ <= max_fd; fd_++) {
+                if (FD_ISSET(fd_, &working_set)) {
+                    if (fd_ == fd){
+                        char* response = prepare_buffer(BUFFER_SIZE);
+                        if (read(fd, response, BUFFER_SIZE) < 0) {
+                            throw Exception("Error on reading: " + string(get_socket_error()));
+                        }
+                        handle_message(response);
+                        delete[] response;
+                    }
+                    else {
+                        char* buffer = prepare_buffer(BUFFER_SIZE);
+                        if (read(STDIN_FILENO, buffer, BUFFER_SIZE) < 0) {
+                            throw Exception("Error on reading: " + string(get_socket_error()));
+                        }
+                        string command = string(buffer);
+                        delete[] buffer;
+                        io_handler->handle_command(command.erase(command.length() - 1));
+                    }
                 }
-                handle_message(response);
-                delete[] response;
-            }
-            if (FD_ISSET(STDIN_FILENO, &master_set)) {
-                char* buffer = prepare_buffer(BUFFER_SIZE);
-                if (read(STDIN_FILENO, buffer, BUFFER_SIZE) < 0) {
-                    throw Exception("Error on reading: " + string(get_socket_error()));
-                }
-                string command = string(buffer);
-                delete[] buffer;
-                io_handler->handle_command(command.erase(command.length() - 1));
             }
         } catch (const Exception& e) {
             IOHandler::show(e.get_message());
@@ -280,11 +296,15 @@ void Client::handle_recievereply_message(char* buffer, int offset, MESSAGE_LENGT
     USER_ID_TYPE sender_id;
     memcpy(&sender_id, buffer+offset, sizeof(sender_id));
     offset += (int)sizeof(sender_id);
-    int num = ((int)length - (int)sizeof(MESSAGE_ID_TYPE) - (int)sizeof(MESSGAE_TYPE_TYPE) - (int)sizeof(USER_ID_TYPE));
-    char *message = prepare_buffer(num + 1);
-    memcpy(message, buffer+offset, num);
-    message[num] = '\0';
-    get_message(sender_id, string(message));
+    cout << (unsigned)sender_id << endl;
+    if (sender_id != NO_SENDER_ID)
+    {
+        int num = ((int)length - (int)sizeof(MESSAGE_ID_TYPE) - (int)sizeof(MESSGAE_TYPE_TYPE) - (int)sizeof(USER_ID_TYPE));
+        char *message = prepare_buffer(num + 1);
+        memcpy(message, buffer+offset, num);
+        message[num] = '\0';
+        get_message(sender_id, string(message));
+    }
 }
 
 int main(int argc, char* argv[])

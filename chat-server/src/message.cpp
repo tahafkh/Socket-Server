@@ -10,7 +10,7 @@ Message::Message(USER_ID_TYPE sender_id, string content)
     this->content = content;
 }
 
-MESSAGE_ID_TYPE Message::get_next_id() { return next_id++; }
+MESSAGE_ID_TYPE Message::get_next_id() { return ++next_id; }
 
 USER_ID_TYPE Message::get_sender_id() { return sender_id; }
 

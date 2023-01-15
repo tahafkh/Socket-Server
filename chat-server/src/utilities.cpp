@@ -9,7 +9,7 @@ using namespace std;
 char* prepare_buffer(int length)
 {
     char* buffer = new char[length];
-    bzero(buffer, length);
+    memset(buffer, 0, length);
     return buffer;
 }
 

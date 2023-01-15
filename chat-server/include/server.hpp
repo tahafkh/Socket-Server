@@ -43,12 +43,12 @@ private:
   int accept_new_client();
   void disconnect_user(int fd);
 
-  const char* handle_message(char* buffer, int fd);
-  const char* handle_connect_message(char* buffer, int offset, MESSAGE_LENGTH_TYPE length, int fd);
-  const char* handle_list_message(char* buffer, int offset, MESSAGE_LENGTH_TYPE length);
-  const char* handle_info_message(char* buffer, int offset, MESSAGE_LENGTH_TYPE length);
-  const char* handle_send_message(char* buffer, int offset, MESSAGE_LENGTH_TYPE length, int fd);
-  const char* handle_recieve_message(char* buffer, int offset, MESSAGE_LENGTH_TYPE length, int fd);
+  const char* handle_message(char* buffer, int fd, int& reply_offset);
+  const char* handle_connect_message(char* buffer, int offset, MESSAGE_LENGTH_TYPE length, int fd, int& reply_offset);
+  const char* handle_list_message(char* buffer, int offset, MESSAGE_LENGTH_TYPE length, int& reply_offset);
+  const char* handle_info_message(char* buffer, int offset, MESSAGE_LENGTH_TYPE length, int& reply_offset);
+  const char* handle_send_message(char* buffer, int offset, MESSAGE_LENGTH_TYPE length, int fd, int& reply_offset);
+  const char* handle_recieve_message(char* buffer, int offset, MESSAGE_LENGTH_TYPE length, int fd, int& reply_offset);
 
   int fd;
   std::string address;

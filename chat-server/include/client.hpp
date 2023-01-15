@@ -36,6 +36,7 @@ public:
     };
 private:
     void connect_to_server();
+    void recieve_pending_messages();
     void get_username(USER_ID_TYPE user_id);
 
     void handle_message(char* buffer);

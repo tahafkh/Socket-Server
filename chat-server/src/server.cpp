@@ -112,9 +112,10 @@ USER_STATUS_TYPE Server::send_message(Message *message, USER_ID_TYPE id) {
     auto user = find_user_by_id(users, id);
     if (user == users.end())
         throw Exception("User not found");
-    const char* content = message_handler->prepare_recievereply_message(message);
+    int content_size = 0;
+    const char* content = message_handler->prepare_recievereply_message(message, content_size);
     if ((*user)->is_online()) {
-        if (write((*user)->get_fd(), content, sizeof(content)) < 0)
+        if (write((*user)->get_fd(), content, content_size) < 0)
             throw Exception("Error on writing to socket: " + string(get_socket_error()));
     }
     else (*user)->add_message(message);
@@ -159,7 +160,6 @@ void Server::run()
                         FD_SET(client_fd, &master_set);
                         if (client_fd > max_fd)
                             max_fd = client_fd;
-                        cout << "New client connected" << endl;
                     }
                     else {
                         char* request = prepare_buffer(BUFFER_SIZE);
@@ -173,9 +173,10 @@ void Server::run()
                             disconnect_user(i);
                         }
                         else {
-                            const char* response = handle_message(request, i);
+                            int reply_offset = 0;
+                            const char* response = handle_message(request, i, reply_offset);
                             if (response != nullptr) {
-                                if (write(i, response, sizeof(response)) < 0)
+                                if (write(i, response, reply_offset) < 0)
                                     throw Exception("Error on writing to socket: " + string(get_socket_error()));
                                 delete[] response;
                             }
@@ -190,7 +191,7 @@ void Server::run()
     }
 }
 
-const char* Server::handle_message(char* buffer, int fd)
+const char* Server::handle_message(char* buffer, int fd, int& reply_offset)
 {
     MESSGAE_TYPE_TYPE type;
     MESSAGE_ID_TYPE id;
@@ -198,23 +199,23 @@ const char* Server::handle_message(char* buffer, int fd)
     int offset = message_handler->get_message_headers(buffer, type, id, length);
     if (type == Message::Type::CONNECT)
     {
-        return handle_connect_message(buffer, offset, length, fd);
+        return handle_connect_message(buffer, offset, length, fd, reply_offset);
     }
     else if (type == Message::Type::LIST)
     {
-        return handle_list_message(buffer, offset, length);
+        return handle_list_message(buffer, offset, length, reply_offset);
     }
     else if (type == Message::Type::INFO)
     {
-        return handle_info_message(buffer, offset, length);
+        return handle_info_message(buffer, offset, length, reply_offset);
     }
     else if (type == Message::Type::SEND)
     {
-        return handle_send_message(buffer, offset, length, fd);
+        return handle_send_message(buffer, offset, length, fd, reply_offset);
     }
     else if (type == Message::Type::RECIEVE)
     {
-        return handle_recieve_message(buffer, offset, length, fd);
+        return handle_recieve_message(buffer, offset, length, fd, reply_offset);
     }
     else
     {
@@ -222,7 +223,7 @@ const char* Server::handle_message(char* buffer, int fd)
     }
 }
 
-const char* Server::handle_connect_message(char* buffer, int offset, MESSAGE_LENGTH_TYPE length, int fd)
+const char* Server::handle_connect_message(char* buffer, int offset, MESSAGE_LENGTH_TYPE length, int fd, int& reply_offset)
 {
     int username_length = length - int(sizeof(MESSAGE_ID_TYPE)) - int(sizeof(MESSGAE_TYPE_TYPE));
     char* username = prepare_buffer(username_length + 1);
@@ -232,26 +233,30 @@ const char* Server::handle_connect_message(char* buffer, int offset, MESSAGE_LEN
     add_user(string(username), fd);
     delete[] username;
 
-    return message_handler->prepare_connack_message();
+    return message_handler->prepare_connack_message(reply_offset);
 }
 
-const char* Server::handle_list_message(char* buffer, int offset, MESSAGE_LENGTH_TYPE length)
+const char* Server::handle_list_message(char* buffer, int offset, MESSAGE_LENGTH_TYPE length, int& reply_offset)
 {
     vector<USER_ID_TYPE> user_list = get_user_list();
-    return message_handler->prepare_listreply_message(user_list);
+    return message_handler->prepare_listreply_message(user_list, reply_offset);
 }
 
-const char* Server::handle_info_message(char* buffer, int offset, MESSAGE_LENGTH_TYPE length)
+const char* Server::handle_info_message(char* buffer, int offset, MESSAGE_LENGTH_TYPE length, int& reply_offset)
 {
     USER_ID_TYPE user_id;
     memcpy(&user_id, buffer+offset, sizeof(user_id));
     offset += (int)sizeof(user_id);
-    string user_name = get_user_name(user_id);
-
-    return message_handler->prepare_inforeply_message(user_name);
+    string user_name;
+    try{
+        user_name = get_user_name(user_id);
+    } catch (const Exception& e) {
+        user_name = "";
+    }
+    return message_handler->prepare_inforeply_message(user_name, reply_offset);
 }
 
-const char* Server::handle_send_message(char* buffer, int offset, MESSAGE_LENGTH_TYPE length, int fd)
+const char* Server::handle_send_message(char* buffer, int offset, MESSAGE_LENGTH_TYPE length, int fd, int& reply_offset)
 {
     USER_ID_TYPE reciever_id;
     memcpy(&reciever_id, buffer+offset, sizeof(reciever_id));
@@ -266,18 +271,28 @@ const char* Server::handle_send_message(char* buffer, int offset, MESSAGE_LENGTH
     delete[] message;
     USER_STATUS_TYPE status = send_message(message_, reciever_id);
 
-    return message_handler->prepare_sendreply_message(status);
+    return message_handler->prepare_sendreply_message(status, reply_offset);
 }
 
-const char* Server::handle_recieve_message(char* buffer, int offset, MESSAGE_LENGTH_TYPE length, int fd)
+const char* Server::handle_recieve_message(char* buffer, int offset, MESSAGE_LENGTH_TYPE length, int fd, int& reply_offset)
 {
     vector<Message*> messages = get_messages(fd);
     USER_ID_TYPE user_id = get_user_id(fd);
-    for (auto message : messages)
+    if (messages.size() == 0)
     {
+        Message *message = new Message(NO_SENDER_ID, "");
         send_message(message, user_id);
-        sleep(DELAY);
+        delete message;
     }
+    else{
+        for (auto message : messages)
+        {
+            send_message(message, user_id);
+            delete message;
+            sleep(DELAY);
+        }
+    }
+    reply_offset = 0;
     return nullptr;
 }
 

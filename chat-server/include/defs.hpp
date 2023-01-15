@@ -16,6 +16,8 @@
 
 #define DELAY 5
 
+#define NO_SENDER_ID 0
+
 const std::string LIST_COMMAND = "list";
 const std::string SEND_COMMAND = "send";
 const std::string EXIT_COMMAND = "exit";

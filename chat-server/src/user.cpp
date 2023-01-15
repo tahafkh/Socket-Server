@@ -6,7 +6,7 @@ USER_ID_TYPE User::next_id = 0;
 
 User::User(string name, int fd)
 {
-    id = next_id++;
+    id = ++next_id;
     this->name = name;
     this->fd = fd;
     status = Status::ONLINE;
