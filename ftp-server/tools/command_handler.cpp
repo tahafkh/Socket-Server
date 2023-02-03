@@ -178,8 +178,8 @@ std::vector<std::string> CommandHandler::handle_retr(int size, string file_name,
     if (system(temp.c_str()) != 0)
         return {ERROR, SPACE};
     string final_message = read_file_to_string("file.txt");
-    if (system("rm file.txt") != 0)
-        return {ERROR, SPACE};
+    // if (system("rm file.txt") != 0)
+    //     return {ERROR, SPACE};
         
     client->get_user_info()->change_size(file_size);
     logger->write_message(client->get_username() +  COLON + file_name + " downloaded.");
